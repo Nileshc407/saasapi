@@ -1,0 +1,17 @@
+<p>Dear <strong>$First_name $Last_name</strong>,</p>
+<p><br /><strong>Congratulations! </strong>You are now enrolled in our&nbsp;<strong>$Loyalty_program_name</strong> of&nbsp; our <strong>$Company_name </strong>Program.</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;"><strong>Your Enrollment Details are as Follows</strong></span></p>
+<p>&nbsp;</p>
+<ol>
+<li><strong>Membership ID - $Membership_id</strong></li>
+<li><strong>User Name/Email id - $User_name</strong></li>
+<li><strong>Password- $Password</strong></li>
+<li><strong>Pin - $Pin</strong></li>
+</ol>
+<p><br />Please download the APK from <strong><a href="$Website"> Click Here  </a> </strong></p>
+
+
+
+
+About your Enrollment in Loyalty Program $First_name

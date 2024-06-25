@@ -1,0 +1,42 @@
+URL												Method	Parameters					Description
+http://localhost/task_manager/v1/register		POST	name, email, password		User registration
+http://localhost/task_manager/v1/login			POST	email, password				User login
+http://localhost/task_manager/v1/tasks			POST	task						To create new task
+http://localhost/task_manager/v1/tasks			GET									Fetching all tasks
+http://localhost/task_manager/v1/tasks/:id		GET									Fetching single task
+http://localhost/task_manager/v1/tasks/:id		PUT									Updating single task
+http://localhost/task_manager/v1/tasks/:id		DELETE	task, status				Deleting single task
+
+
+Artcaffeloyalty==> 033ebc1f7e02174e4b386ee7981de53fa6adea5f:906dc483564123d3:w838+Ilh239UCe2fuqTLnw==
+novacomloyalty==> 033ebc1f7e02174e4b386ee7981de53fa6adea5f:906dc483564123d3:fuPBq6EtJ1XKcAHOIcP+ng==
+
+KATAKIRR=>033ebc1f7e02174e4b386ee7981de53fa6adea5f:906dc483564123d3:EVGf+4gh2dyW9knuOvD0Jg==
+
+
+033ebc1f7e02174e4b386ee7981de53fa6adea5f:906dc483564123d3:fuPBq6EtJ1XKcAHOIcP+ng==
+
+SELECT `Enrollement_id`,`First_name`,`Current_balance`,`Blocked_points`,`Debit_points`,`Total_topup_amt`,`total_purchase`,`Total_reddems` FROM `igain_enrollment_master` WHERE `Card_id` LIKE '2020000071' ORDER BY `Enrollement_id` ASC
+
+
+RewriteEngine On 
+RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteRule ^(.*)$ %{ENV:BASE}index.php [QSA,L]
+
+
+
+RewriteEngine On 
+RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteRule ^(.*)$ %{ENV:BASE}index.php [QSA,L]
+
+
+
+ALTER TABLE `igain_transaction` CHANGE `Mpesa_Paid_Amount` `Mpesa_Paid_Amount` DECIMAL( 25, 2 ) NOT NULL DEFAULT '0';
+ALTER TABLE `igain_transaction` CHANGE `COD_Amount` `COD_Amount` DECIMAL( 25, 2 ) NOT NULL DEFAULT '0';
+ALTER TABLE `igain_transaction` CHANGE `Mpesa_TransID` `Mpesa_TransID` VARCHAR( 45 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL ;
+ALTER TABLE `igain_transaction` CHANGE `Redeem_amount` `Redeem_amount` DECIMAL( 25, 2 ) NOT NULL DEFAULT '0';
+
+
+
+SELECT Enrollement_id, First_name, Last_name, User_email_id,Card_id,User_pwd,pinno,Current_balance,Blocked_points,Debit_points,Phone_no,Total_reddems,total_purchase,Total_topup_amt,Tier_name  FROM igain_enrollment_master  
+        JOIN igain_tier_master ON igain_tier_master. Tier_id =igain_enrollment_master.Tier_id  WHERE igain_enrollment_master.Company_id=3 and User_id=1
