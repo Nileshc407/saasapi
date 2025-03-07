@@ -185,8 +185,7 @@ class OrderHandler
     }
 	public function Insert_online_purchase_transaction($insert_data) 
 	{
-		// print_r($insert_data); die;
-		 $key = array_keys($insert_data);
+		$key = array_keys($insert_data);
 		$val = array_values($insert_data);
 		$sql = "INSERT INTO igain_transaction (" . implode(', ', $key) . ") " . "VALUES ('" . implode("', '", $val) . "')";
 		$stmt = $this->conn->prepare($sql);
@@ -201,7 +200,7 @@ class OrderHandler
 		else
 		{
 			return FAIL;			
-		} 
+		}
 	}
 	public function insert_loyalty_transaction_child($insert_data) 
 	{

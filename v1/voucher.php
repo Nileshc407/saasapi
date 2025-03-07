@@ -215,6 +215,7 @@ $app->post('/getdiscountvouchers','authenticate', function() use ($app)
 				
 				$GetVouchersId = $redemptionObj->Get_voucher_id($row['Gift_card_id'],$Company_id,$Enrollement_id);
 				$Voucher_id = $GetVouchersId['Voucher_id'];
+				$Offer_code = $GetVouchersId['Offer_code'];
 				
 				$GetVouchersDetails = $redemptionObj->Get_voucher_details($Voucher_id,$Company_id);
 				if($GetVouchersDetails != Null)
@@ -225,8 +226,19 @@ $app->post('/getdiscountvouchers','authenticate', function() use ($app)
 				}
 				else
 				{
-					$name = null;
-					$description = null;
+					$GetVouchersDetails2 = $redemptionObj->Get_voucher_details2($Offer_code,$Company_id);
+					
+					if($GetVouchersDetails2 !=Null){
+						$name = $GetVouchersDetails2['Offer_name'];
+						$description = $GetVouchersDetails2['Offer_description'];
+						$Voucher_image = "no image";
+					}
+					else
+					{
+						$name = "Discount Voucher";
+						$description = "Discount Voucher";
+						$Voucher_image = "no image";
+					}
 				}
 				$Voucher_Details[] = array("code"=>$row['Gift_card_id'],"type"=>$Voucher_Type,"currency"=>$Currency_symbol,"amount"=>number_format($Voucher_Amount,2),"validity"=>$row['Valid_till'],"name"=>$name,"description"=>$description,"image"=>$Voucher_image);		
 			}
@@ -607,7 +619,7 @@ $app->post('/validatevoucher','authenticate', function() use ($app)
 					exit;
 				}
 			}
-			else if($Card_Payment_Type_id == 99)
+			else if($Card_Payment_Type_id == 99 || $Card_Payment_Type_id == 998)
 			{
 				if($Card_balance > 0)
 				{

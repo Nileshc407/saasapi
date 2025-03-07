@@ -47,30 +47,20 @@ class AuctionHandler {
 
         $today=date('Y-m-d H:i:s');
 
-		$stmt = $this->conn->prepare("SELECT MAX(Bid_value) as Bid_value FROM igain_auction_winner LEFT JOIN igain_auction_master ON igain_auction_master.Auction_id=igain_auction_winner.Auction_id WHERE  
-        igain_auction_winner.Winner_flag = 0 AND igain_auction_winner.Company_id = ? AND igain_auction_winner.Auction_id = ? ");
+		$stmt = $this->conn->prepare("SELECT Bid_value,Enrollment_id FROM igain_auction_winner WHERE Auction_id =? AND Company_id = ? AND Bid_value = (SELECT Max(Bid_value) FROM igain_auction_winner WHERE Winner_flag = 0 AND Company_id = ? AND Auction_id =?)");
 		
-		/* $stmt = $this->conn->prepare("SELECT MAX(Bid_value) as Bid_value ,Min_increment,Min_bid_value,igain_auction_master.Auction_id,igain_auction_master.Prize FROM igain_auction_winner LEFT JOIN igain_auction_master ON igain_auction_master.Auction_id=igain_auction_winner.Auction_id  WHERE  
-        igain_auction_winner.Winner_flag=0 AND igain_auction_master.Company_id = ?  AND igain_auction_master.Active_flag = 1 AND igain_auction_master.Auction_id = ? "); */
-
-
-        $stmt->bind_param("ss", $_SESSION['company_id'],$id);
+        $stmt->bind_param("ssss",$id,$_SESSION['company_id'],$_SESSION['company_id'],$id);
         $stmt->execute();
         $stmt->store_result();
-		// echo "stmt-------".$stmt;
-        // echo "---num_rows---".$stmt->num_rows."----<br>";
+	 
         if ($stmt->num_rows > 0) {
-            
-            // $user = $stmt->get_result()->fetch_assoc();
-            // $stmt->bind_result($Bid_value,$Min_increment,$Min_bid_value,$Auction_id,$Prize);			
-            $stmt->bind_result($Bid_value);			
+            	
+            $stmt->bind_result($Bid_value,$Enrollment_id);			
             $stmt->fetch(); 
             $res = array();
             $res["Bid_value"] = $Bid_value;
-            // $res["Min_increment"] = $Min_increment;
-            // $res["Min_bid_value"] = $Min_bid_value;
-            // $res["id"] = $Auction_id;
-            // $res["Prize"] = $Prize;
+            $res["Enrollment_id"] = $Enrollment_id;
+          
             $stmt->close(); 
 			
             return $res;
@@ -80,7 +70,7 @@ class AuctionHandler {
     }
 	public function Fetch_Auction_Datails($id) 
 	{
-		$stmt = $this->conn->prepare("SELECT Min_bid_value,Min_increment,Auction_id,Prize FROM igain_auction_master WHERE  
+		$stmt = $this->conn->prepare("SELECT Auction_name,Min_bid_value,Min_increment,Auction_id,Prize FROM igain_auction_master WHERE  
         igain_auction_master.Active_flag = 1 AND igain_auction_master.Company_id = ? AND igain_auction_master.Auction_id = ? ");
 
         $stmt->bind_param("ss", $_SESSION['company_id'],$id);
@@ -90,10 +80,11 @@ class AuctionHandler {
         if ($stmt->num_rows > 0) {
             
             // $user = $stmt->get_result()->fetch_assoc();
-            $stmt->bind_result($Min_bid_value,$Min_increment,$Auction_id,$Prize);			
+            $stmt->bind_result($Auction_name,$Min_bid_value,$Min_increment,$Auction_id,$Prize);			
 		
             $stmt->fetch(); 
             $res = array();
+            $res["Auction_name"] = $Auction_name;
             $res["Min_increment"] = $Min_increment;
             $res["Min_bid_value"] = $Min_bid_value;
             $res["id"] = $Auction_id;

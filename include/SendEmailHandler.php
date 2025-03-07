@@ -7,7 +7,7 @@ use PHPMailer\PHPMailer\Exception;
 require '../PHPMailer/src/Exception.php';
 require '../PHPMailer/src/PHPMailer.php';
 require '../PHPMailer/src/SMTP.php';
-
+require '../googleapis/vendor/autoload.php';
 /* Mail Functionality */
 
 class SendEmailHandler {
@@ -86,8 +86,50 @@ class SendEmailHandler {
 			$Company_Currency = $Comp["Currency_name"];
 			$Domain_name = $Comp["Domain_name"];
 			$Fcm_access_token = $Comp["Fcm_access_token"];
+			$Enable_fcm = $Comp["Enable_fcm"];
+			$Token_creation_date = $Comp["Token_creation_date"];
+			$Fcm_project_id = $Comp["Fcm_project_id"];
 		}
-
+		
+		if($Enable_fcm == 1)
+		{
+			$currentDirectory = __DIR__;
+			$jsonFile = "$currentDirectory/fcmJson/$Fcm_project_id.json";
+			
+			if(file_exists($jsonFile))
+			{
+				$currentTime = date("Y-m-d H:i:s");
+				
+				$H = 00;
+				$M = 58;
+				
+				$cenvertedTime = date("Y-m-d H:i:s",strtotime("+$H hour +$M minutes",strtotime($Token_creation_date)));
+				
+				if($currentTime > $cenvertedTime)
+				{
+					$client= new Google_Client();
+					$client->setAuthConfig($jsonFile);
+					$client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+					$client->refreshTokenWithAssertion();
+					$token = $client->getAccessToken();
+					
+					$CompanyData['Fcm_access_token'] = $token['access_token'];
+					$CompanyData['Token_creation_date'] = $currentTime;
+				
+					$resultQ=$this->dbHobj->updateAccessToken($CompanyData,$Company_id);
+				} 
+			}
+			$CompanyDetails=$this->dbHobj->getCompanyDetails();
+		
+			while ($Comp = $CompanyDetails->fetch_assoc()) {
+									
+				$Access_token = $Comp["Fcm_access_token"];
+			}
+		}
+		else{
+			$Access_token = Null;
+		}
+		
 		$SellerDetails=$this->dbHobj->superSellerDetails();
 		
 		$Super_Seller_id = $SellerDetails['id'];
@@ -167,18 +209,18 @@ class SendEmailHandler {
 		ob_end_clean();	
 		
 		/*************************Email_body Variable Replace Code***************/
-			$search_variables = array('$First_name','$Last_name','$Loyalty_program_name','$Membership_id','$Company_name','$User_name','$Password','$Pin_no','$Website','$Outlet_name','$Joining_bonus_points','$Current_balance','$Credit_points','$Purchase_date','$Cancellation_date','$Purchase_amount','$Cancelled_amount','$Debited_points','$Bill_no','$End_date','$Start_date','$Voucher_type','$Revenue_voucher','$Product_voucher','$Customer_name','$Discount_voucher','$Discount_percentage','$Discount_value','$User_email_id','$Pwdlink','$Company_Currency','$Transaction_date','$Google_play_link','$Ios_application_link','$Survey_name','$Survey_reward','$Order_no','$Amount','$Redeem_amount','$Redeem_points','$datatable','$Gift_card_no','$Gift_card_amount','$Paid_amount','$Valid_till','$Pin','$Transfered_points','$Transferred_to','$Promo_code','$Promo_points','$Transferred_from','$Order_amount','$Discount_amount','$Balance_due','$Gained_points','$Current_balance','$Outlet_name','$Brand_name','$Voucher_no','$Voucher_validity','$Description','$Reward_amt','$Reward_percent','$Received_points','$Received_from','$Voucher_name','$Quantity','$product_name','$product_image','$Symbol_of_currency','$Code_pin','$Comapany_Currency','$Notification_description','$Company_primary_contact_person','$Query','$Phone_no','$New_Tier_name');
+			$search_variables = array('$First_name','$Last_name','$Loyalty_program_name','$Membership_id','$Company_name','$User_name','$Password','$Pin_no','$Website','$Outlet_name','$Joining_bonus_points','$Current_balance','$Credit_points','$Purchase_date','$Cancellation_date','$Purchase_amount','$Cancelled_amount','$Debited_points','$Bill_no','$End_date','$Start_date','$Voucher_type','$Revenue_voucher','$Product_voucher','$Customer_name','$Discount_voucher','$Discount_percentage','$Discount_value','$User_email_id','$Pwdlink','$Company_Currency','$Transaction_date','$Google_play_link','$Ios_application_link','$Survey_name','$Survey_reward','$Order_no','$Amount','$Redeem_amount','$Redeem_points','$datatable','$Gift_card_no','$Gift_card_amount','$Paid_amount','$Valid_till','$Pin','$Transfered_points','$Transferred_to','$Promo_code','$Promo_points','$Transferred_from','$Order_amount','$Discount_amount','$Balance_due','$Gained_points','$Current_balance','$Outlet_name','$Brand_name','$Voucher_no','$Voucher_validity','$Description','$Reward_amt','$Reward_percent','$Received_points','$Received_from','$Voucher_name','$Quantity','$product_name','$product_image','$Symbol_of_currency','$Code_pin','$Comapany_Currency','$Notification_description','$Company_primary_contact_person','$Query','$Phone_no','$New_Tier_name','$Auction_name','$Min_Bid_Value','$Bid_value_1');
 			
-			$inserts_contents = array($First_name,$Last_name,$Company_name,$Card_id,$Company_name,$User_email_id,$User_pwd,$pinno,$Website,$Super_Seller_Name,$param['Joining_bonus_points'],$Current_balance,$param['Credit_points'],$param['Purchase_date'],$param['Cancellation_date'],$param['Purchase_amount'],$param['Cancelled_amount'],$param['Debited_points'],$param['Bill_no'],$param['End_date'],$param['Start_date'],$param['Voucher_type'],$param['Revenue_voucher'],$param['Product_voucher'],$Customer_name,$param['Discount_voucher'],$param['Discount_percentage'],$param['Discount_value'],$User_email_id,$Pwdlink,$Company_Currency,$Transaction_date,$Cust_apk_link,$Cust_ios_link,$param['Survey_name'],$param['Survey_reward'],$param['Order_no'],$param['Amount'],$param['Redeem_amount'],$param['Redeem_points'],$param['datatable'],$param['Gift_card_no'],$param['Gift_card_amount'],$param['Paid_amount'],$param['Valid_till'],$pinno,$param['Transfered_points'],$param['Transferred_to'],$param['Promo_code'],$param['Promo_points'],$param['Transferred_from'],$param['Order_amount'],$param['Discount_amount'],$param['Balance_due'],$param['Gained_points'],$param['Current_balance'],$param['Outlet_name'],$param['Brand_name'],$Voucher_no_text,$param['Voucher_validity'],$param['Description'],$param['Reward_amt'],$param['Reward_percent'],$param['Received_points'],$param['Received_from'],$param['Voucher_name'],$param['Quantity'],$param['product_name'],$param['product_image'],$param['Symbol_of_currency'],$Pin_codes_text,$Company_Currency,$param['Notification_description'],$Company_primary_contact_person,$param['Notification_type'],$Phone_no,$New_Tier_name);
+			$inserts_contents = array($First_name,$Last_name,$Company_name,$Card_id,$Company_name,$User_email_id,$User_pwd,$pinno,$Website,$Super_Seller_Name,$param['Joining_bonus_points'],$Current_balance,$param['Credit_points'],$param['Purchase_date'],$param['Cancellation_date'],$param['Purchase_amount'],$param['Cancelled_amount'],$param['Debited_points'],$param['Bill_no'],$param['End_date'],$param['Start_date'],$param['Voucher_type'],$param['Revenue_voucher'],$param['Product_voucher'],$Customer_name,$param['Discount_voucher'],$param['Discount_percentage'],$param['Discount_value'],$User_email_id,$Pwdlink,$Company_Currency,$Transaction_date,$Cust_apk_link,$Cust_ios_link,$param['Survey_name'],$param['Survey_reward'],$param['Order_no'],$param['Amount'],$param['Redeem_amount'],$param['Redeem_points'],$param['datatable'],$param['Gift_card_no'],$param['Gift_card_amount'],$param['Paid_amount'],$param['Valid_till'],$pinno,$param['Transfered_points'],$param['Transferred_to'],$param['Promo_code'],$param['Promo_points'],$param['Transferred_from'],$param['Order_amount'],$param['Discount_amount'],$param['Balance_due'],$param['Gained_points'],$param['Current_balance'],$param['Outlet_name'],$param['Brand_name'],$Voucher_no_text,$param['Voucher_validity'],$param['Description'],$param['Reward_amt'],$param['Reward_percent'],$param['Received_points'],$param['Received_from'],$param['Voucher_name'],$param['Quantity'],$param['product_name'],$param['product_image'],$param['Symbol_of_currency'],$Pin_codes_text,$Company_Currency,$param['Notification_description'],$Company_primary_contact_person,$param['Notification_type'],$Phone_no,$New_Tier_name,$param['Auction_name'],$param['Min_Bid_Value'],$param['Bid_value_1']);
 			
 			$email_content = str_replace($search_variables,$inserts_contents,$TemplateDetails["Email_body"]);
 				
 		/*******************Email_body Variable Replace Code****************/
 		/*******************Email_subject Variable Replace Code************/
 			
-			$search_variables_sub = array('$First_name','$Last_name','$Company_name','$End_date','$Start_date','$Voucher_type','$Revenue_voucher','$Product_voucher','$Current_balance','$Membership_id','$Customer_name','$Discount_voucher','$Discount_percentage','$Discount_value','$User_email_id','$Pwdlink','$Company_Currency','$Joining_bonus_points','$Transaction_date','$Google_play_link','$Ios_application_link','$Transferred_from','$Order_no','$Transfered_points','$Transferred_to','$Received_points','$Received_from','$Promo_code','$Promo_points');
+			$search_variables_sub = array('$First_name','$Last_name','$Company_name','$End_date','$Start_date','$Voucher_type','$Revenue_voucher','$Product_voucher','$Current_balance','$Membership_id','$Customer_name','$Discount_voucher','$Discount_percentage','$Discount_value','$User_email_id','$Pwdlink','$Company_Currency','$Joining_bonus_points','$Transaction_date','$Google_play_link','$Ios_application_link','$Transferred_from','$Order_no','$Transfered_points','$Transferred_to','$Received_points','$Received_from','$Promo_code','$Promo_points','$Auction_name');
 
-			$inserts_contents_sub = array($First_name,$Last_name,$Company_name,$param['End_date'],$param['Start_date'],$param['Voucher_type'],$param['Revenue_voucher'],$param['Product_voucher'],$Current_balance,$Card_id,$Customer_name,$param['Discount_voucher'],$param['Discount_percentage'],$param['Discount_value'],$User_email_id,$Pwdlink,$Company_Currency,$param['Joining_bonus_points'],$param['Transaction_date'],$Cust_apk_link,$Cust_ios_link,$param['Transferred_from'],$param['Order_no'],$param['Transfered_points'],$param['Transferred_to'],$param['Received_points'],$param['Received_from'],$param['Promo_code'],$param['Promo_points']);
+			$inserts_contents_sub = array($First_name,$Last_name,$Company_name,$param['End_date'],$param['Start_date'],$param['Voucher_type'],$param['Revenue_voucher'],$param['Product_voucher'],$Current_balance,$Card_id,$Customer_name,$param['Discount_voucher'],$param['Discount_percentage'],$param['Discount_value'],$User_email_id,$Pwdlink,$Company_Currency,$param['Joining_bonus_points'],$param['Transaction_date'],$Cust_apk_link,$Cust_ios_link,$param['Transferred_from'],$param['Order_no'],$param['Transfered_points'],$param['Transferred_to'],$param['Received_points'],$param['Received_from'],$param['Promo_code'],$param['Promo_points'],$param['Auction_name']);
 		
 			$Email_subject = str_replace($search_variables_sub,$inserts_contents_sub,$TemplateDetails["Email_subject"]);
 			
@@ -282,17 +324,20 @@ class SendEmailHandler {
 		{
 			$insert_id = $this->notiHobj->Insert_notification($NotiPara);
 		
-			if($Fcm_access_token != Null && $Fcm_token != Null)
+			if($Access_token != Null && $Fcm_token != Null)
 			{	
-				$url = "https://fcm.googleapis.com/fcm/send";
-				$api_key = $Fcm_access_token;
-				$To = $Fcm_token;	
+				$Key = $Access_token;
+				$To = $Fcm_token;
+				$url = "https://fcm.googleapis.com/v1/projects/$Fcm_project_id/messages:send";	
 				
-				$input_data = array("id"=>$insert_id,"redirect_to"=>"ReadNotification");
+				/* $input_data = array("id"=>$insert_id,"redirect_to"=>"ReadNotification");
 				$notification_data = array("title"=>$Company_name,"body"=>$Email_subject);
 
-				$input_notification = array("to"=>$Fcm_token,"data"=>$input_data,"notification"=>$notification_data);
-				$notifBodyReq = json_encode($input_notification);
+				$input_notification = array("to"=>$Fcm_token,"data"=>$input_data,"notification"=>$notification_data); */
+				
+				$input_payload = array('message' => array('token'=>$To,'notification' => array('title'=>$Company_name,'body'=>$Email_subject),'data'=> array('story_id'=>"$insert_id"),'android' => array('notification' => array('click_action'=>'ReadNotification')),'apns' => array('payload' => array('aps' => array('category'=>'ReadNotification')))));
+				
+				$notifBodyReq = json_encode($input_payload);
 				
 				$curl = curl_init();
 				
@@ -301,7 +346,9 @@ class SendEmailHandler {
 				  CURLOPT_POST => true,
 				  CURLOPT_POSTFIELDS => $notifBodyReq,  
 				  CURLOPT_RETURNTRANSFER => true,
-				  CURLOPT_HTTPHEADER => array('Authorization:key='.$api_key,'Content-Type: application/json')
+				  CURLOPT_HTTPHEADER => array('Authorization: Bearer '.$Key,
+				  'Content-Type: application/json'
+				  )
 				));
 				$response =curl_exec($curl);
 				$data = json_decode($response,true);

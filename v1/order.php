@@ -577,7 +577,7 @@ $app->get('/getitems','authenticate', function() use ($app)
 	echoRespnse($response); 
 	// exit;
 });
-$app->post('/placetransaction','authenticate', function() use ($app) 
+$app->post('/placeorder','authenticate', function() use ($app) 
 {  	 
 	$Company_id = $_SESSION["company_id"];
 	$Ecommerce_flag = $_SESSION["Ecommerce_flag"];
@@ -596,14 +596,13 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 	$bill_amount = str_replace( ',', '', $bill_amount);
 	$outlet_no = $request_array['outletno'];
 	$order_no = $request_array['orderno'];
-	$Channel_id = $request_array['channel'];
 	$Pos_bill_items = $request_array['itemsdata'];
 	
 	$voucher_details = $request_array['voucherdetails'];
 	$Pos_voucher_no = $voucher_details['code'];
-	$Pos_voucher_no = "";
+	// $Pos_voucher_no = "";
 	$voucher_amount = $voucher_details['amount'];
-	$voucher_amount = 0;
+	// $voucher_amount = 0;
 	$Pos_voucher_amount = str_replace( ',', '', $voucher_amount);
 	
 	$gift_card_details = $request_array['giftcarddetails'];
@@ -616,7 +615,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 	$Pos_points_amount = str_replace( ',', '', $redeem_amount);
 	$Pos_points_redeemed = $redeem_points;
 	$loyaltydiscount = $request_array['loyaltydiscount'];
-	$loyaltydiscount = 0;
+	// $loyaltydiscount = 0;
 	$loyalty_discount = str_replace( ',', '', $loyaltydiscount);
 	
 	$payment_details = $request_array['paymentdetails']; 
@@ -851,14 +850,17 @@ $app->post('/placetransaction','authenticate', function() use ($app)
   
 			$lv_date_time2 = $date->format('Y-m-d'); 
 
+			// $Trans_type = 12;
 			$Trans_type = 2;
-			$lv_Channel_id = $Channel_id;
+			$Trans_Channel_id = 2;
+			// $Trans_Channel_id = 12;
 			$Payment_type_id = $Pos_payment_type;
 			
 			if($Payment_type_id == Null)
 			{
 				$Payment_type_id = 1;
 			}
+			// $Remarks = "Saas Api Online Order";
 			$Remarks = "Loyalty Api Transaction";
 			
 			if($Sub_seller_admin == 1) 
@@ -962,7 +964,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 						$Product_Voucher_id = $Product_Voucher_Details['Voucher_id'];
 						$Product_Voucher_Offer_code = $Product_Voucher_Details['Offer_code'];
 						
-						if($Product_Voucher_id ==0) // product voucher in percentage
+						if($Product_Voucher_item_code !=Null) // product voucher in percentage
 						{
 							$Cust_Item_Num = array();
 							foreach($Pos_bill_items as $item)
@@ -1084,7 +1086,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 							}
 						}
 					}
-					else if($Card_Payment_Type_id == 99)
+					else if($Card_Payment_Type_id == 99 || $Card_Payment_Type_id == 998)
 					{
 						if($Card_balance > 0)
 						{
@@ -1115,6 +1117,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 							exit;
 						}
 					}
+					$Pos_voucher_amount = str_replace( ',', '', $Pos_voucher_amount);
 					
 					$Pos_voucher_amount = floor($Pos_voucher_amount);  //discount / product voucher amount
 				}
@@ -1418,7 +1421,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 						
 						if($Stamp_item_flag == 1)
 						{
-							$Extra_earn_points = $result['Extra_earn_points'];
+							$Extra_earn_points = $result['Extra_earn_points']*$Pos_item_qty;
 							$Extra_earn_points_Loyalty_pts[]=$Extra_earn_points;
 						}
 						if($sellerID!=0)
@@ -1448,10 +1451,8 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 								foreach($loyalty_prog as $prog)
 								{
 									$member_Tier_id = $lv_member_Tier_id;
-									$member_Channel_id = $lv_Channel_id;
 									$value = array();
 									$dis = array();
-									$disPoint = array();
 									$LoyaltyID_array = array();
 									$Loyalty_at_flag = 0;	
 									$lp_type=substr($prog['Loyalty_name'],0,2);
@@ -1471,36 +1472,29 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 										$lp_Till_date = $lp_data['Till_date'];
 										$Loyalty_at_value = $lp_data['Loyalty_at_value'];
 										$Loyalty_at_transaction = $lp_data['Loyalty_at_transaction'];
-										$Loyalty_at_transaction_inPoints = $lp_data['Loyalty_at_transaction_inPoints'];
 										$discount = $lp_data['discount'];
-										$discount_inPoints = $lp_data['discount_inPoints'];
 										$lp_Tier_id = $lp_data['Tier_id'];
 										$Category_flag = $lp_data['Category_flag'];
 										$Category_id = $lp_data['Category_id'];
 										$Segment_flag = $lp_data['Segment_flag'];
 										$Segment_id	= $lp_data['Segment_id'];
 									
-									//*************channel and payment ***************
-										$Trans_Payment_flag	= $lp_data['Payment_flag'];
-										$Trans_Channel_flag	= $lp_data['Channel_flag'];
-										$lp_Trans_Channel	= $lp_data['Trans_Channel'];
-										$Lp_Payment_Type_id	= $lp_data['Payment_Type_id'];
-										
-									//*************channel and payment ***************
+								//*************channel and payment ***************
+									$Trans_Payment_flag	= $lp_data['Payment_flag'];
+									$Trans_Channel_flag	= $lp_data['Channel_flag'];
+									$Trans_Channel	= $lp_data['Trans_Channel'];
+									$Lp_Payment_Type_id	= $lp_data['Payment_Type_id'];
 									
+								//*************channel and payment ***************
+								
 										if($lp_Tier_id == 0)
 										{
 											$member_Tier_id = $lp_Tier_id;
-										}
-										if($lp_Trans_Channel == 0)
-										{
-											$member_Channel_id = $lp_Trans_Channel;
 										}
 										if($Loyalty_at_value > 0)
 										{
 											$value[] = $Loyalty_at_value;	
 											$dis[] = $discount;
-											$disPoint[] = $discount_inPoints;
 											$LoyaltyID_array[] = $LoyaltyID;
 											$Loyalty_at_flag = 1;
 										}
@@ -1508,17 +1502,8 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 										{
 											$value[] = $Loyalty_at_transaction;	
 											$dis[] = $Loyalty_at_transaction;
-											$disPoint[] = $Loyalty_at_transaction_inPoints;
 											$LoyaltyID_array[] = $LoyaltyID;
 											$Loyalty_at_flag = 2;
-										}
-										if ($discount_inPoints > 0) 
-										{
-											$Loyalty_at_point = 1;
-										}
-										if ($Loyalty_at_transaction_inPoints > 0) 
-										{
-											$Loyalty_at_point = 2;
 										}
 									}
 								
@@ -1538,11 +1523,235 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 										$Purchase_amount=$Pos_item_qty * $Pos_item_rate;
 										 $transaction_amt = (($grand_totalNew * $Purchase_amount ) / $subtotal);
 									}
-									if($Category_flag==1)
-									{	
-										if($member_Tier_id == $lp_Tier_id && $Merchandize_category_id == $Category_id && $member_Channel_id == $lp_Trans_Channel)
+									
+									
+								//*************channel and payment***************
+									if($Trans_Channel_flag==1)
+									{
+										if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 1 && $Trans_Channel_id == $Trans_Channel )
 										{
-											if($Loyalty_at_flag == 1 )
+											for($i=0;$i<=count($value)-1;$i++)
+											{
+												if($i<count($value)-1 && $value[$i+1] != "")
+												{
+													if($transaction_amt > $value[$i] && $transaction_amt <= $value[$i+1])
+													{
+														$loyalty_points = get_discount($transaction_amt,$dis[$i]);
+														$trans_lp_id = $LoyaltyID_array[$i];
+														$Applied_loyalty_id[]=$trans_lp_id;
+														$gained_points_fag = 1;
+														$points_array[] = $loyalty_points;
+													}
+												}
+												else if($transaction_amt > $value[$i])
+												{
+													$loyalty_points = get_discount($transaction_amt,$dis[$i]);
+													$gained_points_fag = 1;
+													$trans_lp_id = $LoyaltyID_array[$i];
+													$Applied_loyalty_id[]=$trans_lp_id;					
+													$points_array[] = $loyalty_points;
+												}
+											}
+										}
+										if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 2 && $Trans_Channel_id == $Trans_Channel )
+										{
+											$loyalty_points = get_discount($transaction_amt,$dis[0]);
+											$points_array[] = $loyalty_points;
+											$gained_points_fag = 1;
+											$trans_lp_id = $LoyaltyID_array[0];
+											$Applied_loyalty_id[]=$trans_lp_id;
+										}						
+									// unset($dis);
+									}	
+									if($Trans_Payment_flag == 1)
+									{
+										if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 1 && $Lp_Payment_Type_id == $Payment_type_id )
+										{
+											for($i=0;$i<=count($value)-1;$i++)
+											{
+												if($i<count($value)-1 && $value[$i+1] != "")
+												{
+													if($transaction_amt > $value[$i] && $transaction_amt <= $value[$i+1])
+													{
+														$loyalty_points = get_discount($transaction_amt,$dis[$i]);
+														$trans_lp_id = $LoyaltyID_array[$i];
+														$Applied_loyalty_id[]=$trans_lp_id;
+														$gained_points_fag = 1;
+														$points_array[] = $loyalty_points;
+													}
+												}
+												else if($transaction_amt > $value[$i])
+												{
+													$loyalty_points = get_discount($transaction_amt,$dis[$i]);
+													$gained_points_fag = 1;
+													$trans_lp_id = $LoyaltyID_array[$i];
+													$Applied_loyalty_id[]=$trans_lp_id;					
+													$points_array[] = $loyalty_points;
+												}
+											}
+										}
+										
+										if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 2 && $Lp_Payment_Type_id == $Payment_type_id)
+										{
+											$loyalty_points = get_discount($transaction_amt,$dis[0]);
+											$points_array[] = $loyalty_points;
+											$gained_points_fag = 1;
+											$trans_lp_id = $LoyaltyID_array[0];
+											$Applied_loyalty_id[]=$trans_lp_id;
+										}	
+									}
+								//************channel and payment ***************
+									if($Category_flag==1)
+									{
+										if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 1 && $Merchandize_category_id == $Category_id )
+										{
+											for($i=0;$i<=count($value)-1;$i++)
+											{
+												if($i<count($value)-1 && $value[$i+1] != "")
+												{
+													if($transaction_amt > $value[$i] && $transaction_amt <= $value[$i+1])
+													{
+														$loyalty_points = get_discount($transaction_amt,$dis[$i]);
+														$trans_lp_id = $LoyaltyID_array[$i];
+														$Applied_loyalty_id[]=$trans_lp_id;
+														$gained_points_fag = 1;
+														$points_array[] = $loyalty_points;
+													}
+												}
+												else if($transaction_amt > $value[$i])
+												{
+													$loyalty_points = get_discount($transaction_amt,$dis[$i]);
+													$gained_points_fag = 1;
+													$trans_lp_id = $LoyaltyID_array[$i];
+													$Applied_loyalty_id[]=$trans_lp_id;					
+													$points_array[] = $loyalty_points;
+												}
+											}
+										}
+										if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 2 && $Merchandize_category_id == $Category_id )
+										{
+											$loyalty_points = get_discount($transaction_amt,$dis[0]);
+											$points_array[] = $loyalty_points;
+											$gained_points_fag = 1;
+											$trans_lp_id = $LoyaltyID_array[0];
+											$Applied_loyalty_id[]=$trans_lp_id;
+										}						
+									// unset($dis);
+									}
+									else if($Segment_flag==1)
+									{											
+										$Get_segments2 = $orderObj->edit_segment_id($Company_id,$Segment_id);
+										
+										$Customer_array=array();
+										$Applicable_array[]=0;
+										unset($Applicable_array);
+										
+										foreach($Get_segments2 as $Get_segments)
+										{
+											if($Get_segments['Segment_type_id']==1)  // 	Age 
+											{
+												$lv_Cust_value=date_diff(date_create($Date_of_birth), date_create('today'))->y;
+											}												
+											if($Get_segments['Segment_type_id']==2)//Sex
+											{
+												$lv_Cust_value=$Sex;
+											}
+											if($Get_segments['Segment_type_id']==3)//Country
+											{
+												$lv_Cust_value = $Country_name;
+												if(strcasecmp($lv_Cust_value,$Get_segments['Value'])==0)
+												{
+													$Get_segments['Value']=$lv_Cust_value;
+												}
+											}
+											if($Get_segments['Segment_type_id']==4)//District
+											{
+												$lv_Cust_value=$District;
+												
+												if(strcasecmp($lv_Cust_value,$Get_segments['Value'])==0)
+												{
+													$Get_segments['Value']=$lv_Cust_value;
+												}
+											}
+											if($Get_segments['Segment_type_id']==5)//State
+											{
+												$lv_Cust_value=$State_name;	
+												if(strcasecmp($lv_Cust_value,$Get_segments['Value'])==0)
+												{
+													$Get_segments['Value']=$lv_Cust_value;
+												}
+											}
+											if($Get_segments['Segment_type_id']==6)//city
+											{
+												$lv_Cust_value=$City_name;
+												
+												if(strcasecmp($lv_Cust_value,$Get_segments['Value'])==0)
+												{
+													$Get_segments['Value']=$lv_Cust_value;
+												}
+											}
+											if($Get_segments['Segment_type_id']==7)//Zipcode
+											{
+												$lv_Cust_value=$Zipcode;
+												
+											}
+											if($Get_segments['Segment_type_id']==8)//Cumulative Purchase Amount
+											{
+												$lv_Cust_value=$total_purchase;	
+											}
+											if($Get_segments['Segment_type_id']==9)//Cumulative Points Redeem 
+											{
+												$lv_Cust_value=$Total_reddems;
+											}
+											if($Get_segments['Segment_type_id']==10)//Cumulative Points Accumulated
+											{
+												$start_date=$joined_date;
+												$end_date=date("Y-m-d");
+												$transaction_type_id = 12;
+												$Tier_id=$lp_Tier_id;
+												
+												$Trans_Records = $orderObj->get_cust_trans_summary_all($Company_id,$Customer_enroll_id,$start_date,$end_date,$transaction_type_id,$Tier_id,'','');
+												
+												// foreach($Trans_Records as $Trans_Records)
+												// {
+													$lv_Cust_value=$Trans_Records['Total_Gained_Points'];
+												// }											
+											}
+											if($Get_segments['Segment_type_id']==11)//Single Transaction  Amount
+											{
+												$start_date=$joined_date;
+												$end_date=date("Y-m-d");
+												$transaction_type_id = 12;
+												$Tier_id=$lp_Tier_id;
+												
+												$Trans_Records1 = $orderObj->get_cust_trans_details($Company_id,$start_date,$end_date,$Customer_enroll_id,$transaction_type_id,$Tier_id,'','');
+												
+												/* foreach($Trans_Records as $Trans_Records)
+												{
+													$lv_Max_amt[]=$Trans_Records->Purchase_amount;
+												}
+												$lv_Cust_value=max($lv_Max_amt); */	
+												
+												$lv_Cust_value=$Trans_Records1['Purchase_amount'];				
+											}
+											if($Get_segments['Segment_type_id']==12)//Membership Tenor
+											{
+												$tUnixTime = time();
+												list($year,$month, $day) = EXPLODE('-', $joined_date);
+												$timeStamp = mktime(0, 0, 0, $month, $day, $year);
+												$lv_Cust_value= ceil(abs($timeStamp - $tUnixTime) / 86400);
+											}
+											
+											$Get_segments = Get_segment_based_customers($lv_Cust_value,$Get_segments['Operator'],$Get_segments['Value'],$Get_segments['Value1'],$Get_segments['Value2']);
+											
+											$Applicable_array[]=$Get_segments;
+											
+										}
+										if(!in_array(0, $Applicable_array, true))
+										{
+											$Customer_array[]=$Customer_enroll_id;
+											
+											if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 1)
 											{
 												for($i=0;$i<=count($value)-1;$i++)
 												{
@@ -1566,84 +1775,55 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 														$points_array[] = $loyalty_points;
 													}
 												}
-											}
-										}
-										
-										if($member_Tier_id == $lp_Tier_id && $Merchandize_category_id == $Category_id && $member_Channel_id == $lp_Trans_Channel)
-										{
-											if($Loyalty_at_point == 1 )
-											{
-												for($i=0;$i<=count($value)-1;$i++)
-												{
-													if($i<count($value)-1 && $value[$i+1] != "")
-													{
-														if($transaction_amt > $value[$i] && $transaction_amt <= $value[$i+1])
-														{
-															$loyalty_points = $disPoint[$i];
-															$trans_lp_id = $LoyaltyID_array[$i];
-															$Applied_loyalty_id[]=$trans_lp_id;
-															$gained_points_fag = 1;
-															$points_array[] = $disPoint[$i];
-														}
-													}
-													else if($transaction_amt > $value[$i])
-													{
-														$loyalty_points = $disPoint[$i];
-														$gained_points_fag = 1;
-														$trans_lp_id = $LoyaltyID_array[$i];
-														$Applied_loyalty_id[]=$trans_lp_id;				
-														$points_array[] = $disPoint[$i];
-													}
-												}
-											}
-										}
-										
-										if($member_Tier_id == $lp_Tier_id && $Merchandize_category_id == $Category_id && $member_Channel_id == $lp_Trans_Channel)
-										{ 
-											if($Loyalty_at_flag == 2)
-											{
+											}									
+											if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 2 )
+											{	
 												$loyalty_points = get_discount($transaction_amt,$dis[0]);
 												$points_array[] = $loyalty_points;
 												$gained_points_fag = 1;
 												$trans_lp_id = $LoyaltyID_array[0];
-												$Applied_loyalty_id[]=$trans_lp_id;
+												$Applied_loyalty_id[]=$trans_lp_id;	
 											}
-										}
-										if($member_Tier_id == $lp_Tier_id && $Merchandize_category_id == $Category_id && $member_Channel_id == $lp_Trans_Channel)
-										{ 
-											if($Loyalty_at_point == 2)
+										} 
+									}
+									else
+									{
+										if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 1  && $Trans_Channel == 0 && $Lp_Payment_Type_id == 0)
+										{
+											for($i=0;$i<=count($value)-1;$i++)
 											{
-												// $Loyalty_at_transaction_inPoints = $disPoint[0];
-												if($Loyalty_at_transaction_inPoints > 0)
+												if($i<count($value)-1 && $value[$i+1] != "")
 												{
-													// $loyalty_points = $disPoint[0];
-													$loyalty_points = $Loyalty_at_transaction_inPoints;
-													$points_array[] = $loyalty_points;
+													if($transaction_amt > $value[$i] && $transaction_amt <= $value[$i+1])
+													{
+														$loyalty_points = get_discount($transaction_amt,$dis[$i]);
+														$trans_lp_id = $LoyaltyID_array[$i];
+														$Applied_loyalty_id[]=$trans_lp_id;
+														$gained_points_fag = 1;
+														$points_array[] = $loyalty_points;
+													}
+												}
+												else if($transaction_amt > $value[$i])
+												{
+													$loyalty_points = get_discount($transaction_amt,$dis[$i]);
 													$gained_points_fag = 1;
-													$trans_lp_id = $LoyaltyID_array[0];
-													$Applied_loyalty_id[]=$trans_lp_id;
+													$trans_lp_id = $LoyaltyID_array[$i];
+													$Applied_loyalty_id[]=$trans_lp_id;					
+													$points_array[] = $loyalty_points;
 												}
 											}
-										}						
-									// unset($dis);
-									  if ($loyalty_points > 0) 
-									  {
-                   
-										$child_data['Company_id']=$Company_id;
-										$child_data['Transaction_date']=$lv_date_time;
-										$child_data['Seller']=$Pos_outlet_id1;
-										$child_data['Enrollement_id']=$cust_enrollment_id;
-										$child_data['Transaction_id']=$Pos_order_no;
-										$child_data['Loyalty_id']=$trans_lp_id;
-										$child_data['Reward_points']=$loyalty_points;
-										
-										$child_result = $orderObj->insert_loyalty_transaction_child($child_data);
-									  }
+										}
+
+										if($member_Tier_id == $lp_Tier_id  && $Loyalty_at_flag == 2  && $Trans_Channel == 0 && $Lp_Payment_Type_id == 0)
+										{
+											$loyalty_points = get_discount($transaction_amt,$dis[0]);
+											$points_array[] = $loyalty_points;
+											$gained_points_fag = 1;
+											$trans_lp_id = $LoyaltyID_array[0];
+											$Applied_loyalty_id[]=$trans_lp_id;
+										}
 									}
 								}
-								/* echo "---Loyalty_at_transaction_inPoints---".$Loyalty_at_transaction_inPoints;
-								echo "----Applied_loyalty_id---";
-								print_r($Applied_loyalty_id); */
 								if(count($Applied_loyalty_id) == 0)
 								{
 									$trans_lp_id=0;
@@ -1659,8 +1839,6 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 							{
 								$total_loyalty_points = 0;
 							}
-							// echo "---Applied_loyalty_id-----";
-							// print_r($Applied_loyalty_id);
 						}
 						else
 						{
@@ -1748,14 +1926,14 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 						$data123['Company_id']=$Company_id;
 						$data123['Trans_type']=$Trans_type;
 						$data123['Purchase_amount']=$Purchase_amount;
-						$data123['Paid_amount']= str_replace( ',', '', $PaidAmount1);
-						$data123['COD_Amount']= str_replace( ',', '', $PaidAmount1);
-						$data123['Redeem_points']= str_replace( ',', '', $Weighted_redeem_points1);
+						$data123['Paid_amount']=str_replace( ',', '', $PaidAmount1);
+						$data123['COD_Amount']=str_replace( ',', '', $PaidAmount1);
+						$data123['Redeem_points']=str_replace( ',', '', $Weighted_redeem_points1);
 						$data123['Redeem_amount']=$Weighted_Redeem_amount;
 						$data123['Payment_type_id']=$Payment_type_id;
 						$data123['Remarks']=$Remarks;
 						$data123['Trans_date']=$lv_date_time;
-						$data123['balance_to_pay']= str_replace( ',', '', $PaidAmount1);
+						$data123['balance_to_pay']=str_replace( ',', '', $PaidAmount1);
 						$data123['Enrollement_id']=$cust_enrollment_id;
 						$data123['Bill_no']=$bill;
 						$data123['Manual_billno']=$Pos_bill_no;
@@ -1776,9 +1954,9 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 						$data123['Total_discount']=$Total_discount1;
 						$data123['Voucher_discount']=$Pos_voucher_amount;
 						$data123['GiftCardNo']=$Pos_giftcard_no;
-						$data123['Channel_id']=$Channel_id;
+						$data123['Channel_id']=$ChannelCompanyId;
 						$data123['Create_user_id']=$Pos_outlet_id1;
-						$data123['Category_id']=$Merchandize_category_id;
+						$data123['Voucher_no']=$Pos_voucher_no;
 					
 						$Transaction_detail = $orderObj->Insert_online_purchase_transaction($data123);
 						
@@ -1789,7 +1967,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 						if($Transaction_detail) //== SUCCESS
 						{}
 					
-						/* if(count($Applied_loyalty_id) != 0)
+						if(count($Applied_loyalty_id) != 0)
 						{		
 							for($l=0;$l<count($Applied_loyalty_id);$l++)
 							{
@@ -1836,7 +2014,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 								
 								$child_result = $orderObj->insert_loyalty_transaction_child($child_data);
 							}
-						} */
+						}
 					/***************Update gift card and vouchers********************/
 						$redeemed_discount_voucher = $Pos_voucher_no; 
 	
@@ -1968,7 +2146,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 										$ProductEmailParam["error"] = false;
 										$ProductEmailParam['Brand_name'] = $seller_name;
 										$ProductEmailParam['Order_no'] = $bill;	
-										$ProductEmailParam['Voucher_no'] = $ProductVoucher_no;
+										$ProductEmailParam['Product_voucher'] = $ProductVoucher_no;
 										$ProductEmailParam['Voucher_validity'] = date("Y-m-d",strtotime("+$Stamp_voucher_validity days"));
 										$ProductEmailParam['Description'] = "You have collected ".$offer['Buy_item']." Stamps from ".$seller_name." and recieved voucher for a ".$offer['Offer_name']." on us. <br><br> Present this voucher code to the cashier to redeem your ".$offer['Free_item']." ".$offer['Offer_name']."*";
 										$ProductEmailParam['Email_template_id'] =25; 
@@ -2101,6 +2279,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 			$EmailParam['Balance_due'] = number_format($Paid_amount, 2);
 			$EmailParam['Gained_points'] = round($total_loyalty_email);
 			$EmailParam['Current_balance'] = $Update_Current_balance;
+			$EmailParam['Discount_voucher'] = $Pos_voucher_no;
 			$EmailParam['datatable'] = $html;
 			$EmailParam['Email_template_id'] =5; 
 			
@@ -2230,7 +2409,7 @@ $app->post('/placetransaction','authenticate', function() use ($app)
 					$response["balancedue"] = number_format($grand_total,2);
 					$response["gainedpoints"] = $total_loyalty_email;
 					$response["currentbalance"] = round($Available_Balance);
-					//$response["note"] = "gainedpoints will be added into current balance when order will be closed";
+					// $response["note"] = "gainedpoints will be added into current balance when order will be closed";
 					
 				/******************insert JSON*****************/
 					$APILogParam['Company_id'] =$Company_id;

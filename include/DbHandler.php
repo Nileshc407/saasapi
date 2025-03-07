@@ -443,5 +443,21 @@ class DbHandler {
             return NULL;
         }
     }
+	public function updateAccessToken($CompanyData,$Company_id)
+	{		
+		$cols = array(); 
+		foreach($CompanyData as $key=>$val) {
+			$cols[] = "$key = '$val'";
+		}
+				
+		$sql = "UPDATE igain_company_master SET " . implode(', ', $cols) . " WHERE Company_id=$Company_id";		
+				 	
+		$stmt = $this->conn->prepare($sql);
+		
+		$stmt->execute();
+		$num_affected_rows = $stmt->affected_rows;
+		$stmt->close();
+		return $num_affected_rows > 0;	
+	}
 }
 ?>

@@ -110,7 +110,6 @@ $app->add(new \Slim\Middleware\SessionCookie(array(
 		// reading post params
 		$param['membershipid'] = $request_array['membershipid'];			
 		$param['phoneno'] = $_SESSION["phonecode"].''.$request_array['membershipid'];
-		
 		// validatePhone($request_array['phoneno'] );
 
 		$userObj = new UserHandler();

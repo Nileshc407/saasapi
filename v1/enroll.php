@@ -77,6 +77,14 @@ function authenticate(\Slim\Route $route) {
             
             $result = $comp->getCompanyDetails($api_key);
 
+			if($_SESSION['company_id'] == ""){
+				$response["error"] = true;
+				$response["errorcode"] = 404;
+                $response["message"] = "Our services are currently unavailable. We're working to resolve the issue as quickly as possible. Please try again later. Thank you for your patience.";
+                echoRespnse(404, $response);
+				$app->stop();
+			}
+			
             if ($result != NULL) 
 			{
 				// $response["error"] = false;

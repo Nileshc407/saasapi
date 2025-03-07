@@ -322,8 +322,11 @@ $app->post('/login','authenticate', function() use ($app) {
 					{
 						$Current_point_balance=$Current_point_balance;
 					}
-                     $response["errorcode"] = 1001;
-                     $response["message"] = "OK";
+					
+					$user1 = $userObj->getMemberDetails($user['Membership_ID'],$user['Membership_ID']);
+					
+                    $response["errorcode"] = 1001;
+                    $response["message"] = "OK";
                     // $response['id'] = $user['id'];
                     $response['fname'] = $user['fname'];
                     $response['lname'] = $user['lname'];
@@ -335,6 +338,8 @@ $app->post('/login','authenticate', function() use ($app) {
                     $response['purchaseamount'] = $user['total_purchase'];
                     $response['bonuspoints'] = $user['Total_topup_amt'];
                     $response['redeempoints'] = $user['Total_reddems'];
+                    $response['currency'] = $_SESSION["Currency_name"];
+					$response["tier"] = $user1['Tier_name'];
 					
                 } else {
 					

@@ -167,40 +167,31 @@ $app->add(new \Slim\Middleware\SessionCookie(array(
 			 
 			if ($user != NULL) 
 			{
+					//  echo "_SESSION-Company_id--".$_SESSION['company_id'];					 
+				
+					// $response["error"] = false;
 					$id = $user['id'];
 					$Membership_ID = $user['Membership_ID'];
 					$AuctionDetails = $dbAuctionObj->getAuction();
 					
-					
+					// print_r($AuctionDetails); 
 						$auctions=array();
 						while ($auction = $AuctionDetails->fetch_array()) {
 							
-							$Auction_Max_Bid_val = $dbAuctionObj->Fetch_Auction_Max_Bid_Value($auction["Auction_id"]);
+							$Auction_Max_Bid_val =$dbAuctionObj->Fetch_Auction_Max_Bid_Value($auction["Auction_id"]);
+
+							// echo "---Auction_Max_Bid_val---".$Auction_Max_Bid_val["Bid_value"]."-<br>";
 
 							if($Auction_Max_Bid_val["Bid_value"] > 0  ){
 								$Bid_value=$Auction_Max_Bid_val["Bid_value"]+$auction["Min_increment"];
 							} else {
 
-								// $Bid_value = $auction["Min_bid_value"] + $auction["Min_increment"];
-								$Bid_value = $auction["Min_bid_value"];
+								$Bid_value = $auction["Min_bid_value"] + $auction["Min_increment"];
 							}
-							// echo "Auction_id--".$auction["Auction_id"]."---Enrollment_id--".$Auction_Max_Bid_val['Enrollment_id']."---id---" .$id."--Bid_value---".$Auction_Max_Bid_val['Bid_value'];
-							
-							
-							if(empty($Auction_Max_Bid_val)){
-								$Message = "Become First Bidder";
-							}
-							else
-							{
-								if($Auction_Max_Bid_val['Enrollment_id'] == $id){
-									$Message = "You are Highest Bidder";
-								}
-								else
-								{
-									$Message = "You are No Longer Highest Bidder";
-								}
-							}
-							
+
+							// echo "---Min_bid_value---".$auction["Min_bid_value"]."-<br>";
+							// echo "---Bid_value---".$Bid_value."-<br>";
+
 							$auctions[] =  array(
 								'id'    =>  $auction["Auction_id"],
 								'name'    =>  $auction["Auction_name"],
@@ -214,13 +205,13 @@ $app->add(new \Slim\Middleware\SessionCookie(array(
 								'minincrement'  => $auction["Min_increment"],
 								'bidvalue'  => $Bid_value,
 								'outlet'    =>  $auction["First_name"].' '.$auction["Last_name"],
-								'message' => $Message
 								
 							);
 
 							
 						}
-						
+						//print_r($auctions); 
+						// print_r($hobby);
 						$response["auctions"] = $auctions;
 						$response["errorcode"] = 1001;
 						$response["message"] = "OK";
@@ -258,6 +249,16 @@ $app->add(new \Slim\Middleware\SessionCookie(array(
 			$param['bidvalue'] = $request_array['bidvalue'];
 			// validatePhone($request_array['phoneno']);
 		
+
+		/* 	$response1["auctionid"] = $request_array['auctionid'];
+			$response1["membershipid"] = $request_array['membershipid'];
+			$response1["bidvalue"] = $request_array['bidvalue'];
+			echoRespnse(201, $response1);
+			exit;
+			 */
+			// print_r($request_array);
+			// die;
+			
 			$userObj = new UserHandler();
 			$dbHandlerObj = new DbHandler();
 			$dbAuctionObj = new AuctionHandler();
@@ -266,11 +267,12 @@ $app->add(new \Slim\Middleware\SessionCookie(array(
 			$phashObj = new PassHash();
 			
 			$SellerDetails=$dbHandlerObj->superSellerDetails();
-			 
+			// print_r($SellerDetails);    
 			$Super_Seller_id = $SellerDetails['id'];
 			$Super_Seller_Name= $SellerDetails['fname'].' '.$SellerDetails['lname'];
 			$Seller_timezone_entry =$SellerDetails['timezone_entry'];
 			
+	
 			$timezone_entry = $Seller_timezone_entry;
 			$logtimezone = $timezone_entry;
 			$timezone = new DateTimeZone($logtimezone);
@@ -279,6 +281,7 @@ $app->add(new \Slim\Middleware\SessionCookie(array(
 			$Todays_date_time = $date->format('Y-m-d H:i:s');
 			$Todays_date = $date->format('Y-m-d');	
 			
+			// print_r($SellerDetails);
 			$user = $userObj->getUserByMembership($param['membershipid'],$param['phoneno']);
 			$Current_point_balance = $user['Current_balance']-($user['Blocked_points']+$user['Debit_points']);
 			if($Current_point_balance < 0)
@@ -291,18 +294,27 @@ $app->add(new \Slim\Middleware\SessionCookie(array(
 			} 						 
 			if ($user != NULL) 
 			{
+				//  echo "_SESSION-Company_id--".$_SESSION['company_id'];						 
+			
+				// $response["error"] = false;
 				$id = $user['id'];
 				$Membership_ID = $user['Membership_ID'];
+
+				// echo "---id---".$param["id"]."-<br>";
 
 				$AuctionDetails = $dbAuctionObj->Fetch_Auction_Max_Bid_Value($param['auctionid']);
 			
 				$Auction_Details = $dbAuctionObj->Fetch_Auction_Datails($param['auctionid']);
 				
-				
+				// print_r($Auction_Details);
 				$Auction_id = $Auction_Details["id"];
-				$Auction_name = $Auction_Details["Auction_name"];
 				$Min_bid_value = $Auction_Details["Min_bid_value"];
 				$Min_increment = $Auction_Details["Min_increment"];
+				
+				/* echo "---Min_bid_value---".$Min_bid_value."-<br>";
+				echo "---Min_increment---".$Min_increment."-<br>";
+				echo "---Bid_value---".$AuctionDetails["Bid_value"]."-<br>";  
+				die; */
 				
 				if($AuctionDetails["Bid_value"] ==""){
 
@@ -315,10 +327,12 @@ $app->add(new \Slim\Middleware\SessionCookie(array(
 					// $Bid_value= $AuctionDetails["Bid_value"] + $AuctionDetails["Min_increment"];
 					$Bid_value = $AuctionDetails["Bid_value"] + $Min_increment;
 				}
-				
+				// echo "---Bid_value--111---".$Bid_value."-<br>"; 
+				// echo "---Current_balance--111---".$user['Current_balance']."-<br>"; 
+			
 				if($Bid_value <= $param['bidvalue'] )
 				{
-					if($Current_balance >= $param['bidvalue']) 
+					if($Current_balance >= $Bid_value) 
 					{
 						$BidData['Auction_id']=$Auction_id;
 						$BidData['Company_id']=$_SESSION["company_id"];
@@ -346,30 +360,17 @@ $app->add(new \Slim\Middleware\SessionCookie(array(
 							} else {
 								$total_blaockPoints=$total_blaockPoints;
 							}
-							
-						if($PreviousBidValue !="" || $PreviousBidValue !=null)
-						{
+
 							$upData['Blocked_points']=$total_blaockPoints;
 							$valData['Enrollement_id']=$Enrollement_id;
 							$valData['Company_id']=$_SESSION["company_id"];								
 							// echo "---Blocked_points---old-".$upData['Blocked_points']."-<br>";
 							$updateData = $dbHandlerObj->updateData($upData,'igain_enrollment_master',$valData);
-						}
-						if($Enrollement_id != $id)
-						{
+						
 						/* Older Bidder Member */
-							$EmailParam['Notification_type'] = "No Longer Highest Bidder";
-							$EmailParam['Auction_name'] = $Auction_name;
-							$EmailParam['Min_Bid_Value'] = $param['bidvalue'];
-							$EmailParam['Bid_value_1'] = $PreviousBidValue['Bid_value'];
-							$EmailParam['Email_template_id'] =38; 
-							
-							$email = $sendEObj->sendEmail($EmailParam,$Enrollement_id); 
+
 						/* New Bidder Member */
-						}
-						
-							$user = $userObj->getUserByMembership($param['membershipid'],$param['phoneno']);
-						
+							
 							$upData1['Blocked_points']=$user['Blocked_points'] + $param['bidvalue'];
 							$valData1['Enrollement_id']=$user['id'];
 							$valData1['Company_id']=$_SESSION["company_id"];								

@@ -31,7 +31,7 @@ class CompHandler {
 		// echo "----api_key------".$api_key."-----<br>";
 		
 		 
-        $stmt = $this->conn->prepare("SELECT Company_id,Company_name,Redemptionratio,Alise_name,card_decsion,next_card_no,Joining_bonus,Joining_bonus_points,Website,phonecode,Facebook_link,Twitter_link,Linkedin_link,Googlplus_link,Cust_apk_link,Cust_ios_link,Country FROM igain_company_master JOIN igain_country_master ON igain_country_master.id=igain_company_master.Country WHERE Company_id = ?");
+        $stmt = $this->conn->prepare("SELECT Company_id,Company_name,Redemptionratio,Alise_name,card_decsion,next_card_no,Joining_bonus,Joining_bonus_points,Website,phonecode,Facebook_link,Twitter_link,Linkedin_link,Googlplus_link,Cust_apk_link,Cust_ios_link,Country,Currency_name FROM igain_company_master JOIN igain_country_master ON igain_country_master.id=igain_company_master.Country WHERE Company_id = ? and Activated = 1");
 	// echo "----stmt------".$stmt."-----<br>";
 		
         //$stmt = $this->conn->prepare("SELECT id FROM users WHERE api_key = ?");
@@ -41,7 +41,7 @@ class CompHandler {
         if ($stmt->execute()){
 			
 			$res = array();
-            $stmt->bind_result($Company_id,$Company_name,$Redemptionratio,$Alise_name,$card_decsion,$next_card_no,$Joining_bonus,$Joining_bonus_points,$Website,$phonecode,$Facebook_link,$Twitter_link,$Linkedin_link,$Googlplus_link,$Cust_apk_link,$Cust_ios_link,$Country);
+            $stmt->bind_result($Company_id,$Company_name,$Redemptionratio,$Alise_name,$card_decsion,$next_card_no,$Joining_bonus,$Joining_bonus_points,$Website,$phonecode,$Facebook_link,$Twitter_link,$Linkedin_link,$Googlplus_link,$Cust_apk_link,$Cust_ios_link,$Country,$Currency_name);
             $stmt->fetch();
 			
             // $stmt->bind_result($id, $task, $status, $created_at);
@@ -67,6 +67,7 @@ class CompHandler {
             $_SESSION["Cust_apk_link"] = $Cust_apk_link;
             $_SESSION["Cust_ios_link"] = $Cust_ios_link;
             $_SESSION["Country_id"] = $Country;
+			$_SESSION["Currency_name"] = $Currency_name;
 
 
            /*  $_SESSION["company_id"] = $result["Company_id"];

@@ -237,7 +237,7 @@ class RedemptionHandler
     }
 	public function Get_voucher_id($Voucher_code,$Company_id,$Enrollement_id) 
 	{
-        $stmt = $this->conn->prepare("SELECT Voucher_id FROM igain_company_send_voucher WHERE Voucher_code = ? and Company_id = ? and Enrollement_id = ?");
+        $stmt = $this->conn->prepare("SELECT Voucher_id,Offer_code FROM igain_company_send_voucher WHERE Voucher_code = ? and Company_id = ? and Enrollement_id = ?");
         $stmt->bind_param("sss", $Voucher_code,$Company_id,$Enrollement_id);
         if ($stmt->execute()) 
 		{
@@ -253,6 +253,20 @@ class RedemptionHandler
 	{
         $stmt = $this->conn->prepare("SELECT Voucher_code,Voucher_name,Voucher_description,Item_image1 FROM igain_company_voucher_catalogue WHERE Voucher_id = ? and Company_id = ?");
         $stmt->bind_param("ss", $Voucher_id,$Company_id);
+        if ($stmt->execute()) 
+		{
+            $voucherDetails = $stmt->get_result()->fetch_assoc();
+            return $voucherDetails;
+        } 
+		else 
+		{
+            return NULL;
+        }
+    }
+	public function Get_voucher_details2($Offer_code,$Company_id) 
+	{
+        $stmt = $this->conn->prepare("SELECT Offer_name,Offer_description FROM igain_offer_master WHERE Offer_code = ? and Company_id = ?");
+        $stmt->bind_param("ss", $Offer_code,$Company_id);
         if ($stmt->execute()) 
 		{
             $voucherDetails = $stmt->get_result()->fetch_assoc();

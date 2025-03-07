@@ -39,7 +39,9 @@ class VoucherHandler
 	
 		// $stmt = $this->conn->prepare("SELECT G.Gift_card_id,G.Card_balance,G.Valid_till,G.Discount_percentage,B.Voucher_code,B.Company_merchandize_item_code, B.Quantity as Voucher_Qty,B.Cost_price as Voucher_Cost_price,of.Offer_description,of.Offer_name FROM igain_giftcard_tbl as G LEFT JOIN igain_company_send_voucher as B ON G.Gift_card_id = B.Voucher_code AND G.Company_id = B.Company_id JOIN igain_offer_master as of ON of.Offer_code = B.Offer_code and of.Company_id = B.Company_id WHERE G.Card_id = ? AND G.Company_id = ? AND G.Gift_card_id = ? AND G.Valid_till >= ? AND G.Payment_Type_id = 997 AND B.Voucher_id = 0 AND B.Offer_code != '' AND G.Card_balance >= 0");
 		
-		$stmt = $this->conn->prepare("SELECT Voucher_code,Company_merchandize_item_code,Quantity as Voucher_Qty,Cost_price as Voucher_Cost_price FROM igain_company_send_voucher WHERE Enrollement_id = ? AND Company_id = ? AND Voucher_code = ? AND Valid_till >= ? AND Voucher_id = 0 GROUP BY Voucher_code,Company_merchandize_item_code ORDER BY Voucher_code ASC,Cost_price ASC");
+		// $stmt = $this->conn->prepare("SELECT Voucher_code,Company_merchandize_item_code,Quantity as Voucher_Qty,Cost_price as Voucher_Cost_price FROM igain_company_send_voucher WHERE Enrollement_id = ? AND Company_id = ? AND Voucher_code = ? AND Valid_till >= ? AND Voucher_id = 0 GROUP BY Voucher_code,Company_merchandize_item_code ORDER BY Voucher_code ASC,Cost_price ASC");
+		
+		$stmt = $this->conn->prepare("SELECT Voucher_code,Company_merchandize_item_code,Quantity as Voucher_Qty,Cost_price as Voucher_Cost_price FROM igain_company_send_voucher WHERE Enrollement_id = ? AND Company_id = ? AND Voucher_code = ? AND Valid_till >= ? GROUP BY Voucher_code,Company_merchandize_item_code ORDER BY Voucher_code ASC,Cost_price ASC");
 		
 		//GROUP BY B.Voucher_code,B.Company_merchandize_item_code ORDER BY B.Voucher_code ASC,B.Cost_price ASC 
 		//GROUP BY B.Voucher_code,B.Company_merchandize_item_code ORDER BY B.Voucher_code ASC,B.Cost_price ASC 
